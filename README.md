@@ -1,6 +1,6 @@
 # IntelHexFormatReader #
 
-A library to parse the contents of [an Intel HEX file](https://en.wikipedia.org/wiki/Intel_HEX) into a representative "memory representation".
+IntelHexFormatReader is a library to parse [an Intel HEX file](https://en.wikipedia.org/wiki/Intel_HEX) into a representative "memory representation".
 
 ## How to use ##
 
