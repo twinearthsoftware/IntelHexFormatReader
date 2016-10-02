@@ -15,6 +15,6 @@
     <tags>arduino hex ihex</tags>
   </metadata>
   <files>
-	<file src="bin\$configuration$\IntelHexFormatReader.dll" target="lib\net40\" />
+	<file src="Source\IntelHexFormatReader\bin\$configuration$\IntelHexFormatReader.dll" target="lib\net40\" />
   </files>
 </package>
