@@ -3,9 +3,6 @@ set config=%1
 if "%config%" == "" (
    set config=Release
 )
-
-set EnableNuGetPackageRestore=true
-
 set version=1.0.0
 if not "%PackageVersion%" == "" (
    set version=%PackageVersion%
