@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>IntelHexFormatReader</id>
-    <version>1.0.0</version>
+    <version>$version$</version>
     <title>IntelHexFormatReader</title>
     <authors>Christophe Diericx</authors>
     <owners>Christophe Diericx</owners>
@@ -15,6 +15,6 @@
     <tags>arduino hex ihex</tags>
   </metadata>
   <files>
-	<file src="Source\IntelHexFormatReader\bin\release\IntelHexFormatReader.dll" target="lib\net40\" />
+	<file src="bin\$configuration$\IntelHexFormatReader.dll" target="lib\net40\" />
   </files>
 </package>
