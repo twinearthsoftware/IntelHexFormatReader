@@ -1,6 +1,6 @@
 # IntelHexFormatReader #
 
-IntelHexFormatReader is a library to parse [an Intel HEX file](https://en.wikipedia.org/wiki/Intel_HEX) into a representative "memory representation".
+A .NET library to parse [an Intel HEX file](https://en.wikipedia.org/wiki/Intel_HEX) into a representative "memory representation".
 
 ## How to use ##
 
