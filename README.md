@@ -32,4 +32,4 @@ namespace IntelHexFormatReaderDemo
     }
 }
 ```
-Please note that HexFileReader has a second constructor which allows you to pass any IEnumerable<string> directly.
+HexFileReader has a second constructor which allows you to pass any ```IEnumerable<string>``` directly.
