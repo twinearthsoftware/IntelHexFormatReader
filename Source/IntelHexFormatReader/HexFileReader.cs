@@ -8,130 +8,100 @@ namespace IntelHexFormatReader
 {
     public class HexFileReader
     {
-        private readonly IEnumerable<string> hexFileContents;
-        private readonly int memorySize;
+        private IEnumerable<string> hexRecordLines;
+        private uint memorySize;
 
-        public HexFileReader(string fileName, int memorySize)
-            : this(File.ReadLines(fileName), memorySize)
+        public HexFileReader(string fileName, uint memorySize)
         {
+            if (!File.Exists(fileName)) throw new ArgumentException(string.Format("File {0} does not exist!", fileName));
+            Initialize(File.ReadLines(fileName), memorySize);
         }
 
-        public HexFileReader(IEnumerable<string> hexFileContents, int memorySize)
+        public HexFileReader(IEnumerable<string> hexFileContents, uint memorySize)
         {
-            if (hexFileContents == null) throw new ArgumentException("Hex file contents can not be null!");
-            if (memorySize <= 0) throw new ArgumentException("Memory size must be greater than zero!");
-            this.hexFileContents = hexFileContents;
-            this.memorySize = memorySize;
+            Initialize(hexFileContents, memorySize);
+        }
+
+        private void Initialize(IEnumerable<string> lines, uint memSize)
+        {
+            var fileContents = lines as IList<string> ?? lines.ToList();
+            if (!fileContents.Any()) throw new ArgumentException("Hex file contents can not be empty!");
+            if (memSize <= 0) throw new ArgumentException("Memory size must be greater than zero!");
+            hexRecordLines = fileContents;
+            memorySize = memSize;            
         }
 
         public MemoryBlock Parse()
         {
-            return ReadHexFile(hexFileContents, memorySize);
+            return ReadHexFile(hexRecordLines, memorySize);
         }
 
-        private static MemoryBlock ReadHexFile(IEnumerable<string> fileContents, int memorySize)
+        private static MemoryBlock ReadHexFile(IEnumerable<string> hexRecordLines, uint memorySize)
         {
-            var result = new MemoryBlock { Cells = new MemoryCell[memorySize] };
-            for (var i = 0; i < memorySize; i++)
-                result.Cells[i] = new MemoryCell(i) { Value = 0xff };
+            var result = InitializeMemoryBlock(memorySize);
 
-            var lineNumber = 0;
             var baseAddress = 0;
             var maxAddress = 0;
-            foreach (var line in fileContents)
+            var encounteredEndOfFile = false;
+            foreach (var hexRecordLine in hexRecordLines)
             {
-                var buffer = line;
-                lineNumber++;
-                if (buffer[0] != ':') continue;
-                var ihex = ParseLine(buffer);
-                switch (ihex.RecordType)
+                var hexRecord = HexFileLineParser.ParseLine(hexRecordLine);
+                switch (hexRecord.RecordType)
                 {
-                    case 0:
+                    case RecordType.Data:
+                    {
+                        var nextAddress = hexRecord.Address + baseAddress;
+                        for (var i = 0; i < hexRecord.ByteCount; i++)
                         {
-                            var nextAddress = ihex.Address + baseAddress;
-                            for (var i = 0; i < ihex.ByteCount; i++)
-                            {
-                                if (nextAddress + i > memorySize)
-                                    throw new IOException(
-                                        string.Format("Trying to write to position {0} outside of memory boundaries ({1})!", nextAddress + i, memorySize));
-                                var cell = result.Cells[nextAddress + i];
-                                cell.Value = ihex.Bytes[i];
-                                cell.Modified = true;
-                            }
-                            if (nextAddress + ihex.ByteCount > maxAddress) maxAddress = nextAddress + ihex.ByteCount;
-                            break;
+                            if (nextAddress + i > memorySize)
+                                throw new IOException(
+                                    string.Format("Trying to write to position {0} outside of memory boundaries ({1})!", nextAddress + i, memorySize));
+
+                            var cell = result.Cells[nextAddress + i];
+                            cell.Value = hexRecord.Bytes[i];
+                            cell.Modified = true;
                         }
-                    case 2:
-                        {
-                            baseAddress = (ihex.Bytes[0] << 8 | ihex.Bytes[1]) << 4;
-                            break;
-                        }
-                    case 4:
-                        {
-                            baseAddress = (ihex.Bytes[0] << 8 | ihex.Bytes[1]) << 16;
-                            break;
-                        }
-                    case 1:
-                    case 3:
-                    case 5:
+                        if (nextAddress + hexRecord.ByteCount > maxAddress) maxAddress = nextAddress + hexRecord.ByteCount;
                         break;
-                    default:
-                        throw new IOException(string.Format("Unable to parse line {0} ('{1}')!", lineNumber, line));
+                    }
+                    case RecordType.EndOfFile:
+                    {
+                        hexRecord.Assert(rec => rec.Address == 0, "Address should equal zero in EOF.");
+                        hexRecord.Assert(rec => rec.ByteCount == 0, "Byte count should be zero in EOF.");
+                        hexRecord.Assert(rec => rec.Bytes.Length == 0, "Number of bytes should be zero for EOF.");
+                        hexRecord.Assert(rec => rec.CheckSum == 0xff, "Checksum should be 0xff for EOF.");
+                        encounteredEndOfFile = true;
+                        break;
+                    }
+                    case RecordType.ExtendedSegmentAddress:
+                    {
+                        hexRecord.Assert(rec => rec.ByteCount == 2, "Byte count should be 2.");
+                        baseAddress = (hexRecord.Bytes[0] << 8 | hexRecord.Bytes[1]) << 4;
+                        break;
+                    }
+                    case RecordType.ExtendedLinearAddress:
+                    {
+                        hexRecord.Assert(rec => rec.ByteCount == 2, "Byte count should be 2.");
+                        baseAddress = (hexRecord.Bytes[0] << 8 | hexRecord.Bytes[1]) << 16;
+                        break;
+                    }
+                    case RecordType.StartSegmentAddress:
+                    case RecordType.StartLinearAddress:
+                        break;
                 }
             }
+            if (!encounteredEndOfFile) throw new IOException("No EndOfFile marker found!");
             result.MaxAddress = maxAddress;
             return result;
         }
 
-        private static IntelHexRecord ParseLine(string rec)
+        private static MemoryBlock InitializeMemoryBlock(uint memorySize)
         {
-            if (rec[0] != ':')
-                throw new Exception();
-
-            var hexByteCount = new string(rec.Skip(1).Take(2).ToArray());
-            var byteCount = Convert.ToInt32(hexByteCount, 16);
-
-            var hexAddress = new string(rec.Skip(3).Take(4).ToArray());
-            var address = Convert.ToInt32(hexAddress, 16);
-
-            var hexRecType = new string(rec.Skip(7).Take(2).ToArray());
-            var recType = Convert.ToInt32(hexRecType, 16);
-
-            var hexData = new string(rec.Skip(9).Take(2 * byteCount).ToArray());
-            var bytes = new byte[byteCount];
-            var counter = 0;
-            foreach (var hexByte in Split(hexData, 2))
-                bytes[counter++] = (byte)Convert.ToInt32(hexByte, 16);
-
-            var hexCheckSum = new string(rec.Skip(9 + 2 * byteCount).Take(2).ToArray());
-            var checkSum = Convert.ToInt32(hexCheckSum, 16);
-
-            // Calculate if checksum is correct.
-            var allbytes = new byte[1 + 2 + 1 + byteCount];
-            counter = 0;
-            foreach (var hexByte in Split(new string(rec.Skip(1).Take((4 + byteCount) * 2).ToArray()), 2))
-                allbytes[counter++] = (byte)Convert.ToInt32(hexByte, 16);
-
-            var maskedSumBytes = allbytes.Sum(x => (ushort)x) & 0xff;
-            var checkSumCalculated = (byte)(256 - maskedSumBytes);
-
-            if (checkSumCalculated != checkSum)
-                throw new IOException(string.Format("Checksum for line {0} is incorrect!", rec));
-
-            return new IntelHexRecord
-            {
-                ByteCount = byteCount,
-                Address = address,
-                RecordType = recType,
-                Bytes = bytes,
-                CheckSum = checkSum
-            };
-        }
-
-        private static IEnumerable<string> Split(string str, int chunkSize)
-        {
-            return Enumerable.Range(0, str.Length / chunkSize)
-                .Select(i => str.Substring(i * chunkSize, chunkSize));
+            const byte fillValue = 0xff;
+            var result = new MemoryBlock { Cells = new MemoryCell[memorySize] };
+            for (ulong i = 0; i < memorySize; i++)
+                result.Cells[i] = new MemoryCell(i) { Value = fillValue };
+            return result;
         }
     }
 }

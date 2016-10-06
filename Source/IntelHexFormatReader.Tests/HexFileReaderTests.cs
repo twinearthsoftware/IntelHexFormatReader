@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -9,77 +11,78 @@ namespace IntelHexFormatReader.Tests
     [TestClass]
     public class HexFileReaderTests
     {
-        // Straight from Wikipedia
-        private readonly string[] validSnippet = new[]
-        {
-            ":10010000214601360121470136007EFE09D2190140",
-            ":100110002146017E17C20001FF5F16002148011928",
-            ":10012000194E79234623965778239EDA3F01B2CAA7",
-            ":100130003F0156702B5E712B722B732146013421C7",
-            ":00000001FF"
-        };
+        private static readonly Random random = new Random();
 
-        private readonly string[] wrongCheckSum = new[]
+        // Create an extremely simple valid hex snippet (based on the one from the wikipedia entry on Intel Hex).
+        private static string[] CreateValidHexSnippet(int length)
         {
-            ":10010000214601360121470136007EFE09D21901B3",
-            ":00000001FF"
-        };
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void HexFileReaderThrowsExceptionWhenHexFileContentsIsNull()
-        {
-            var reader = new HexFileReader(new List<string>(), 0);
+            var snippet = new string[length+1];
+            int i;
+            for (i = 0; i < length;)
+            {
+                snippet[i++] = new []
+                {
+                    ":10010000214601360121470136007EFE09D2190140",
+                    ":100110002146017E17C20001FF5F16002148011928",
+                    ":10012000194E79234623965778239EDA3F01B2CAA7",
+                    ":100130003F0156702B5E712B722B732146013421C7"
+                }[random.Next(0,4)];
+            }
+            snippet[i] = ":00000001FF"; // EOF
+            return snippet.ToArray();
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void HexFileReaderThrowsExceptionWhenMemorySizeIsInvalid()
+        [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]
+        public void HexFileReaderThrowsExceptionWhenHexFileContentsIsEmpty()
         {
-            var reader = new HexFileReader(new List<string>(), 0);
+            Action initialize = () => new HexFileReader(new List<string>(), 1024);
+            initialize.ShouldThrow<ArgumentException>().WithMessage("*can not be empty*");
         }
 
         [TestMethod]
-        [ExpectedException(typeof(IOException))]
+        [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]
+        public void HexFileReaderThrowsExceptionWhenMemorySizeIsZero()
+        {
+            Action initialize = () => new HexFileReader(CreateValidHexSnippet(3), 0);
+            initialize.ShouldThrow<ArgumentException>().WithMessage("Memory size must be greater*");
+        }
+
+        [TestMethod]
+        public void HexFileReaderThrowsExceptionWhenEOFIsMissing()
+        {
+            var snippet = CreateValidHexSnippet(4);
+            snippet = snippet.Take(snippet.Length - 1).ToArray(); // DROP EOF
+
+            Action act = () => new HexFileReader(snippet, 1024).Parse();
+            act.ShouldThrow<IOException>().WithMessage("No EndOfFile*");
+        }
+
+        [TestMethod]
+        public void HexFileReaderThrowsExceptionWhenEOFByteCountIsMalformed()
+        {
+            var snippet = CreateValidHexSnippet(1);
+            snippet[1] = ":01000001F707"; // Introduce one byte (illegal in the context of EOF).
+
+            Action act = () => new HexFileReader(snippet, 1024).Parse();
+            act.ShouldThrow<IOException>().WithMessage("Byte count should be zero in EOF*");
+        }
+
+        [TestMethod]
+        public void HexFileReaderThrowsExceptionWhenEOFAddressIsMalformed()
+        {
+            var snippet = CreateValidHexSnippet(1);
+            snippet[1] = ":00010001FE"; // Address not zero (illegal in the context of EOF).
+
+            Action act = () => new HexFileReader(snippet, 1024).Parse();
+            act.ShouldThrow<IOException>().WithMessage("Address should equal zero in EOF*");
+        }
+
+        [TestMethod]
         public void HexFileReaderThrowsExceptionWhenTryingToWriteOutOfBounds()
         {
-            var reader = new HexFileReader(validSnippet, 32);
-            var memory = reader.Parse();
-        }
-
-        [TestMethod]
-        public void HexFileReaderAcceptsValidSnippetAndReturnsCorrectMemoryModel()
-        {
-            var reader = new HexFileReader(validSnippet, 2048);
-            var memory = reader.Parse();
-            for (var i = 0; i < 64; i++)
-                memory.Cells[i + 256].Modified.Should().BeTrue();
-
-            // Check contents of first line.
-            memory.Cells[256].Value.Should().Be(33);
-            memory.Cells[257].Value.Should().Be(70);
-            memory.Cells[258].Value.Should().Be(1);
-            memory.Cells[259].Value.Should().Be(54);
-            memory.Cells[260].Value.Should().Be(1);
-            memory.Cells[261].Value.Should().Be(33);
-            memory.Cells[262].Value.Should().Be(71);
-            memory.Cells[263].Value.Should().Be(1);
-            memory.Cells[264].Value.Should().Be(54);
-            memory.Cells[265].Value.Should().Be(0);
-            memory.Cells[266].Value.Should().Be(126);
-            memory.Cells[267].Value.Should().Be(254);
-            memory.Cells[268].Value.Should().Be(9);
-            memory.Cells[269].Value.Should().Be(210);
-            memory.Cells[270].Value.Should().Be(25);
-            memory.Cells[271].Value.Should().Be(1);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(IOException))]
-        public void HexFileReaderThrowsExceptionForInvalidCheckSum()
-        {
-            var reader = new HexFileReader(wrongCheckSum, 2048);
-            var memory = reader.Parse();
+            Action act = () => new HexFileReader(CreateValidHexSnippet(4), 32).Parse(); // Unsufficient memory size
+            act.ShouldThrow<IOException>().WithMessage("Trying to write *outside of memory boundaries*");
         }
     }
 }
