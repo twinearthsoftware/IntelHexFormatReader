@@ -9,20 +9,24 @@ namespace IntelHexFormatReader
     public class HexFileReader
     {
         private IEnumerable<string> hexRecordLines;
-        private uint memorySize;
+        private int memorySize;
 
-        public HexFileReader(string fileName, uint memorySize)
+        #region Constructors
+
+        public HexFileReader(string fileName, int memorySize)
         {
             if (!File.Exists(fileName)) throw new ArgumentException(string.Format("File {0} does not exist!", fileName));
             Initialize(File.ReadLines(fileName), memorySize);
         }
 
-        public HexFileReader(IEnumerable<string> hexFileContents, uint memorySize)
+        public HexFileReader(IEnumerable<string> hexFileContents, int memorySize)
         {
             Initialize(hexFileContents, memorySize);
         }
 
-        private void Initialize(IEnumerable<string> lines, uint memSize)
+        #endregion
+
+        private void Initialize(IEnumerable<string> lines, int memSize)
         {
             var fileContents = lines as IList<string> ?? lines.ToList();
             if (!fileContents.Any()) throw new ArgumentException("Hex file contents can not be empty!");
@@ -31,17 +35,20 @@ namespace IntelHexFormatReader
             memorySize = memSize;            
         }
 
+        /// <summary>
+        /// Parse the currently loaded HEX file contents.
+        /// </summary>
+        /// <returns>A MemoryBlock representation of the HEX file.</returns>
         public MemoryBlock Parse()
         {
             return ReadHexFile(hexRecordLines, memorySize);
         }
 
-        private static MemoryBlock ReadHexFile(IEnumerable<string> hexRecordLines, uint memorySize)
+        private static MemoryBlock ReadHexFile(IEnumerable<string> hexRecordLines, int memorySize)
         {
-            var result = InitializeMemoryBlock(memorySize);
+            var result = new MemoryBlock(memorySize);
 
             var baseAddress = 0;
-            var maxAddress = 0;
             var encounteredEndOfFile = false;
             foreach (var hexRecordLine in hexRecordLines)
             {
@@ -61,7 +68,6 @@ namespace IntelHexFormatReader
                             cell.Value = hexRecord.Bytes[i];
                             cell.Modified = true;
                         }
-                        if (nextAddress + hexRecord.ByteCount > maxAddress) maxAddress = nextAddress + hexRecord.ByteCount;
                         break;
                     }
                     case RecordType.EndOfFile:
@@ -86,21 +92,23 @@ namespace IntelHexFormatReader
                         break;
                     }
                     case RecordType.StartSegmentAddress:
+                    {
+                        hexRecord.Assert(rec => rec.ByteCount == 4, "Byte count should be 4.");
+                        hexRecord.Assert(rec => rec.Address == 0, "Address should be zero.");
+                        result.CS = (ushort) (hexRecord.Bytes[0] << 8 + hexRecord.Bytes[1]);
+                        result.IP = (ushort) (hexRecord.Bytes[2] << 8 + hexRecord.Bytes[3]);
+                        break;
+                    }
                     case RecordType.StartLinearAddress:
+                        hexRecord.Assert(rec => rec.ByteCount == 4, "Byte count should be 4.");
+                        hexRecord.Assert(rec => rec.Address == 0, "Address should be zero.");
+                        result.EIP = 
+                            (uint) (hexRecord.Bytes[0] << 24) + (uint) (hexRecord.Bytes[1] << 16) 
+                            + (uint) (hexRecord.Bytes[2] << 8) + hexRecord.Bytes[3];
                         break;
                 }
             }
             if (!encounteredEndOfFile) throw new IOException("No EndOfFile marker found!");
-            result.MaxAddress = maxAddress;
-            return result;
-        }
-
-        private static MemoryBlock InitializeMemoryBlock(uint memorySize)
-        {
-            const byte fillValue = 0xff;
-            var result = new MemoryBlock { Cells = new MemoryCell[memorySize] };
-            for (ulong i = 0; i < memorySize; i++)
-                result.Cells[i] = new MemoryCell(i) { Value = fillValue };
             return result;
         }
     }

@@ -37,11 +37,11 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="HexFileLineParser.cs" />
     <Compile Include="HexFileReader.cs" />
-    <Compile Include="IntelHexRecord.cs" />
+    <Compile Include="Model\IntelHexRecord.cs" />
     <Compile Include="Model\MemoryBlock.cs" />
     <Compile Include="Model\MemoryCell.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RecordType.cs" />
+    <Compile Include="Model\RecordType.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="IntelHexFormatReader.nuspec" />

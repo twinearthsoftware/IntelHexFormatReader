@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using IntelHexFormatReader.Model;
 
 namespace IntelHexFormatReader
 {
-    public class HexFileLineParser
+    public static class HexFileLineParser
     {
         private const string COLON = ":";
 

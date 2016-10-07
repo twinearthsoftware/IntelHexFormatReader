@@ -49,6 +49,14 @@ namespace IntelHexFormatReader.Tests
         }
 
         [TestMethod]
+        [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]
+        public void HexFileReaderThrowsExceptionWhenMemorySizeIsSmallerThanZero()
+        {
+            Action initialize = () => new HexFileReader(CreateValidHexSnippet(3), -5);
+            initialize.ShouldThrow<ArgumentException>().WithMessage("Memory size must be greater*");
+        }
+
+        [TestMethod]
         public void HexFileReaderThrowsExceptionWhenEOFIsMissing()
         {
             var snippet = CreateValidHexSnippet(4);
@@ -84,5 +92,32 @@ namespace IntelHexFormatReader.Tests
             Action act = () => new HexFileReader(CreateValidHexSnippet(4), 32).Parse(); // Unsufficient memory size
             act.ShouldThrow<IOException>().WithMessage("Trying to write *outside of memory boundaries*");
         }
+
+        [TestMethod]
+        public void HexFileReaderHandlesDataRecordType()
+        {
+            var reader = new HexFileReader(new List<string>()
+            {
+                ":080000000102030405060708D4", // write 8 bytes (1,2,3,4,5,6,7,8) starting from address 0
+                ":080010000102030405060708C4", // write 8 bytes (1,2,3,4,5,6,7,8) starting from address 16
+                ":00000001FF"
+            }, 32);
+            var memoryBlock = reader.Parse();
+            memoryBlock.Cells.Take(8).All(cell => cell.Modified).Should().BeTrue();
+            memoryBlock.Cells.Skip(8).Take(8).All(cell => !cell.Modified).Should().BeTrue();
+            memoryBlock.Cells.Skip(16).Take(8).All(cell => cell.Modified).Should().BeTrue();
+            memoryBlock.Cells.Skip(24).Take(8).All(cell => !cell.Modified).Should().BeTrue();
+
+            memoryBlock.Cells.Select(cell => cell.Value)
+                .ShouldAllBeEquivalentTo(new[]
+                {
+                      1,   2,   3,   4,   5,   6,   7,   8,
+                    255, 255, 255, 255, 255, 255, 255, 255,
+                      1,   2,   3,   4,   5,   6,   7,   8,
+                    255, 255, 255, 255, 255, 255, 255, 255,
+                });
+        }
+
+        // TODO: add tests for Start Segment Address, Start Linear Address, Start Segment Address, Extended Segment Address
     }
 }

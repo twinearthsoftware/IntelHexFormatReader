@@ -1,12 +1,15 @@
 ﻿namespace IntelHexFormatReader.Model
 {
+    /// <summary>
+    /// Logical representation of a MemoryCell.
+    /// </summary>
     public class MemoryCell
     {
-        public ulong Address { get; private set; }
+        public int Address { get; private set; }
         public bool Modified { get; set; }
         public byte Value { get; set; }
 
-        public MemoryCell(ulong address)
+        public MemoryCell(int address)
         {
             Address = address;
         }

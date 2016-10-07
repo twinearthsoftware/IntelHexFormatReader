@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using FluentAssertions;
+using IntelHexFormatReader.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace IntelHexFormatReader.Tests

@@ -1,4 +1,4 @@
-﻿namespace IntelHexFormatReader
+﻿namespace IntelHexFormatReader.Model
 {
     public enum RecordType
     {
