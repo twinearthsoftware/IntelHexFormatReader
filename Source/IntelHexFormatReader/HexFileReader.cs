@@ -6,6 +6,9 @@ using IntelHexFormatReader.Model;
 
 namespace IntelHexFormatReader
 {
+    /// <summary>
+    /// Reader for the Intel Hex file format.
+    /// </summary>
     public class HexFileReader
     {
         private IEnumerable<string> hexRecordLines;
