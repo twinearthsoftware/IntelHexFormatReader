@@ -17,7 +17,6 @@ Install-Package IntelHexFormatReader
 The following minimal snippet demonstrates loading an Intel HEX file and printing out it's resulting memory representation:
 
 ```csharp
-using System.Diagnostics;
 using IntelHexFormatReader;
 
 namespace IntelHexFormatReaderDemo
@@ -29,7 +28,7 @@ namespace IntelHexFormatReaderDemo
             HexFileReader reader = new HexFileReader(@"C:\\MyHexFiles\\myHexFile.hex", 32768);
             MemoryBlock memoryRepresentation = reader.Parse();
             foreach (MemoryCell cell in memoryRepresentation.Cells)
-                Debug.WriteLine(cell);
+                Console.WriteLine(cell);
         }
     }
 }
@@ -64,12 +63,12 @@ Alternatively, if you have only a single HEX record line to parse, you can use `
 ```csharp
 string hexRecordLine = ":100130003F0156702B5E712B722B732146013421C7";
 IntelHexRecord record = HexFileLineParser.ParseLine(hexRecordLine);
-Debug.WriteLine(record.ByteCount);
-Debug.WriteLine(record.Address.ToString("X4"));
-Debug.WriteLine(record.RecordType.ToString());
-Debug.WriteLine(record.Bytes[5]);
-Debug.WriteLine(record.Bytes[9]);
-Debug.WriteLine(record.CheckSum);
+Console.WriteLine(record.ByteCount);
+Console.WriteLine(record.Address.ToString("X4"));
+Console.WriteLine(record.RecordType.ToString());
+Console.WriteLine(record.Bytes[5]);
+Console.WriteLine(record.Bytes[9]);
+Console.WriteLine(record.CheckSum);
 ```
 
 This will result in the following output:
