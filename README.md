@@ -1,6 +1,6 @@
 # IntelHexFormatReader #
 
-A .NET library to parse [an Intel HEX file](https://en.wikipedia.org/wiki/Intel_HEX) and emit a representative "memory representation". This file format is used often for representing code when programming microprocessors and microcontrollers.
+A .NET library to parse [an Intel HEX file](https://en.wikipedia.org/wiki/Intel_HEX) and emit a representative memory representation. This file format is used often for representing code when programming microprocessors and microcontrollers.
 
 ## How to use the .NET library##
 
