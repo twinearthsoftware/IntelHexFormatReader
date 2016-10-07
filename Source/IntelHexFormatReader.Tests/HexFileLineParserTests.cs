@@ -53,8 +53,8 @@ namespace IntelHexFormatReader.Tests
         [TestMethod]
         public void HexFileLineParserThrowsExceptionWhenCalculatedRequiredLengthIsWrong()
         {
-            const string invalidRecord1 = ":100130003F015672B5E712B722B732146013421C7";   // one character too short
-            const string invalidRecord2 = ":100130003F0156702B5E712B722B7321460133421C7"; // one character too long
+            const string invalidRecord1 = ":100130003F015672B5E712B722B732146013421C7";   // one char too short
+            const string invalidRecord2 = ":100130003F0156702B5E712B722B7321460133421C7"; // one char too long
 
             Action parseInvalidRecord1 = () => HexFileLineParser.ParseLine(invalidRecord1);
             Action parseInvalidRecord2 = () => HexFileLineParser.ParseLine(invalidRecord2);
@@ -98,7 +98,8 @@ namespace IntelHexFormatReader.Tests
         [TestMethod]
         public void HexFileLineParserThrowsExceptionForInvalidCharactersInByteSequence()
         {
-            const string invalidBytes = ":04001000FFAAFFuy01"; // 'uy' (last byte) is not valid in a hex representation of a byte sequence
+            const string invalidBytes = ":04001000FFAAFFuy01"; 
+            // 'uy' (last byte) is not valid in a hex representation of a byte sequence
             Action parseInvalidBytes = () => HexFileLineParser.ParseLine(invalidBytes);
             parseInvalidBytes
                 .ShouldThrow<IOException>()
@@ -109,7 +110,8 @@ namespace IntelHexFormatReader.Tests
         [TestMethod]
         public void HexFileLineParserThrowsExceptionForInvalidCharactersInCheckSum()
         {
-            const string invalidChecksum = ":04001000FFAAFFFFt1"; // 't1' is not valid for a hex representation of a checksum
+            const string invalidChecksum = ":04001000FFAAFFFFt1"; 
+            // 't1' is not valid for a hex representation of a checksum
             Action parseInvalidCheckSum = () => HexFileLineParser.ParseLine(invalidChecksum);
             parseInvalidCheckSum
                 .ShouldThrow<IOException>()
