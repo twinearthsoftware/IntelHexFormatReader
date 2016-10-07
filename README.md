@@ -83,8 +83,3 @@ Data
 ```
 
 The ```HexFileLineParser``` does fairly exhaustive validation so you should not be able to construct invalid ```IntelHexRecord``` objects.
-
-### Currently Unimplemented ###
-
-* Record Type ```StartSegmentAddress```
-* Record Type ```StartLinearAddress```
