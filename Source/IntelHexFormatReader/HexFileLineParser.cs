@@ -29,8 +29,9 @@ namespace IntelHexFormatReader
         {
             if (line == null) throw new IOException("Line to parse can not be null");
             
-            // At a minimum, a record should consist of start code (1 char), byte count (2 chars), adress (4 chars), record type (2 chars), checksum (2 chars) -
-            // only the data part can potentially be empty. This means the line should contain at least 11 characters, or should be deemed too short.
+            // At a minimum, a record should consist of start code (1 char), byte count (2 chars), adress (4 chars), 
+            // record type (2 chars), checksum (2 chars) - only the data part can potentially be empty. This means 
+            // the line should contain at least 11 characters, or should be deemed too short.
             if (line.Length < 11) throw new IOException(string.Format("Line '{0}' is too short!", line));
 
             // First character should be a colon.
@@ -50,7 +51,8 @@ namespace IntelHexFormatReader
 
             if (line.Length != requiredRecordLength)
                 throw new IOException(
-                    string.Format("Line '{0}' does not have required record length of {1}!", line, requiredRecordLength));
+                    string.Format("Line '{0}' does not have required record length of {1}!", 
+                        line, requiredRecordLength));
 
             // Parse address
             var address = TryParseAddress(line.Substring(3, 4));
