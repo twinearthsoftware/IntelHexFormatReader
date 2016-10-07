@@ -15,7 +15,8 @@ namespace IntelHexFormatReader
 
         public HexFileReader(string fileName, int memorySize)
         {
-            if (!File.Exists(fileName)) throw new ArgumentException(string.Format("File {0} does not exist!", fileName));
+            if (!File.Exists(fileName)) 
+                throw new ArgumentException(string.Format("File {0} does not exist!", fileName));
             Initialize(File.ReadLines(fileName), memorySize);
         }
 
@@ -62,7 +63,8 @@ namespace IntelHexFormatReader
                         {
                             if (nextAddress + i > memorySize)
                                 throw new IOException(
-                                    string.Format("Trying to write to position {0} outside of memory boundaries ({1})!", nextAddress + i, memorySize));
+                                    string.Format("Trying to write to position {0} outside of memory boundaries ({1})!", 
+                                        nextAddress + i, memorySize));
 
                             var cell = result.Cells[nextAddress + i];
                             cell.Value = hexRecord.Bytes[i];
