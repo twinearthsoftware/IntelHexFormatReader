@@ -54,7 +54,7 @@ MemoryCell : 0000000F Value: 00 (modified = True)
 ...
 ```
 
-Please note tat ```HexFileReader``` has a second constructor which allows you to pass any ```IEnumerable<string>``` directly.
+Please note that ```HexFileReader``` has a second constructor which allows you to pass any ```IEnumerable<string>``` directly.
 
 ### 2. Using HexFileLineParser ###
 
