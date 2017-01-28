@@ -1,10 +1,11 @@
 ﻿using System;
 using System.IO;
 using FluentAssertions;
+using IntelHexFormatReader;
 using IntelHexFormatReader.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace IntelHexFormatReader.Tests
+namespace IntelHexFormatReaderTests
 {
     [TestClass]
     public class ExtensionsTests
@@ -34,7 +35,7 @@ namespace IntelHexFormatReader.Tests
             cells.LastIndexOf(cell => cell.Value == 0xB0).Should().Be(3);
             cells.LastIndexOf(cell => cell.Value == 0xAA).Should().Be(6);
             cells.LastIndexOf(cell => cell.Value == 0xF0).Should().Be(5);
-            cells.LastIndexOf(cell => cell.Value == 0xFFFF).Should().Be(-1); // Not found
+            cells.LastIndexOf(cell => cell.Value == 0xFF).Should().Be(-1); // Not found
         }
     }
 }

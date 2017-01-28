@@ -28,7 +28,7 @@ namespace IntelHexFormatReader
         public static IntelHexRecord ParseLine(string line)
         {
             if (line == null) throw new IOException("Line to parse can not be null");
-            
+
             // At a minimum, a record should consist of start code (1 char), byte count (2 chars), adress (4 chars), 
             // record type (2 chars), checksum (2 chars) - only the data part can potentially be empty. This means 
             // the line should contain at least 11 characters, or should be deemed too short.
@@ -41,7 +41,7 @@ namespace IntelHexFormatReader
 
             // Parse byteCount, and then calculate and verify required record length
             var byteCount = TryParseByteCount(line.Substring(1, 2));
-            var requiredRecordLength = 
+            var requiredRecordLength =
                 1                   // colon
                 + 2                 // byte count
                 + 4                 // address
@@ -51,7 +51,7 @@ namespace IntelHexFormatReader
 
             if (line.Length != requiredRecordLength)
                 throw new IOException(
-                    string.Format("Line '{0}' does not have required record length of {1}!", 
+                    string.Format("Line '{0}' does not have required record length of {1}!",
                         line, requiredRecordLength));
 
             // Parse address
@@ -63,13 +63,13 @@ namespace IntelHexFormatReader
                 throw new IOException(
                     string.Format("Invalid record type value: '{0}'!", recTypeVal));
 
-            var recType = (RecordType) recTypeVal;
+            var recType = (RecordType)recTypeVal;
 
             // Parse bytes
-            var bytes = TryParseBytes(line.Substring(9, 2*byteCount));
+            var bytes = TryParseBytes(line.Substring(9, 2 * byteCount));
 
             // Parse checksum
-            var checkSum = TryParseCheckSum(line.Substring(9 + (2*byteCount), 2));
+            var checkSum = TryParseCheckSum(line.Substring(9 + (2 * byteCount), 2));
 
             // Verify
             if (!VerifyChecksum(line, byteCount, checkSum))
@@ -94,7 +94,7 @@ namespace IntelHexFormatReader
             catch (Exception ex)
             {
                 throw new IOException(
-                    string.Format("Unable to extract byte count for '{0}'.", hexByteCount), 
+                    string.Format("Unable to extract byte count for '{0}'.", hexByteCount),
                     ex);
             }
         }
@@ -123,7 +123,7 @@ namespace IntelHexFormatReader
             {
                 throw new IOException(
                     string.Format("Unable to extract record type for '{0}'.", hexRecType),
-                    ex);                
+                    ex);
             }
         }
 
@@ -133,7 +133,7 @@ namespace IntelHexFormatReader
             {
                 var bytes = new byte[hexData.Length / 2];
                 var counter = 0;
-                foreach (var hexByte in Split(hexData, 2)) 
+                foreach (var hexByte in Split(hexData, 2))
                     bytes[counter++] = (byte)Convert.ToInt32(hexByte, 16);
                 return bytes;
             }
@@ -141,7 +141,7 @@ namespace IntelHexFormatReader
             {
                 throw new IOException(
                     string.Format("Unable to extract bytes for '{0}'.", hexData),
-                    ex);   
+                    ex);
             }
         }
 
