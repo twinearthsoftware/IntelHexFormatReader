@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp1.0;net452</TargetFrameworks>
+    <TargetFrameworks>netstandard1.6;net452</TargetFrameworks>
     <Authors>Christophe Diericx</Authors>
     <Company />
-    <Description>A .NET library to parse an Intel HEX file and emit a representative memory representation. Compatible with framework targets net452/netcoreapp1.0.</Description>
+    <Description>A .NET library to parse an Intel HEX file and emit a representative memory representation.</Description>
     <PackageProjectUrl>https://github.com/christophediericx/IntelHexFormatReader</PackageProjectUrl>
-    <Version>2.2.1</Version>
+    <Version>2.2.2</Version>
     <PackageTags>intel hex memory</PackageTags>
   </PropertyGroup>
 </Project>
