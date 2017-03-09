@@ -8,8 +8,6 @@ A .NET library to parse [an Intel HEX file](https://en.wikipedia.org/wiki/Intel_
 
 [![NuGet version](https://badge.fury.io/nu/IntelHexFormatReader.svg)](https://badge.fury.io/nu/IntelHexFormatReader)
 
-> *Compatible framework targets: netcoreapp1.0 / net452.
-
 Link the following nuget package in your project in order to use the Intel HEX format reader: https://www.nuget.org/packages/IntelHexFormatReader/
 
 Alternatively, install the package using the nuget package manager console:
