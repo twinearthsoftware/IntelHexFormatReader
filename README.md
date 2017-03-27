@@ -4,7 +4,7 @@ A .NET library to parse [an Intel HEX file](https://en.wikipedia.org/wiki/Intel_
 
 ![IntelHexFormatReader](https://github.com/christophediericx/IntelHexFormatReader/blob/master/Images/intelhexformatreader.png)
 
-## How to use the .NET library##
+## How to use the .NET library ##
 
 [![NuGet version](https://badge.fury.io/nu/IntelHexFormatReader.svg)](https://badge.fury.io/nu/IntelHexFormatReader)
 
