@@ -4,6 +4,12 @@ A .NET library to parse [an Intel HEX file](https://en.wikipedia.org/wiki/Intel_
 
 ![IntelHexFormatReader](https://github.com/christophediericx/IntelHexFormatReader/blob/master/Images/intelhexformatreader.png)
 
+**Compatibility**:
+
+* .NET Standard 1.6
+* .NET Framework 4.5
+* .NET Framework 4.6
+
 ## How to use the .NET library ##
 
 [![NuGet version](https://badge.fury.io/nu/IntelHexFormatReader.svg)](https://badge.fury.io/nu/IntelHexFormatReader)
