@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Title>IntelHexFormatReader</Title>
-    <TargetFrameworks>netstandard1.6;net45;net46</TargetFrameworks>
+    <TargetFrameworks>net45;net46;net5.0</TargetFrameworks>
     <Authors>Christophe Diericx</Authors>
     <Company />
     <Description>A .NET library to parse an Intel HEX file and emit a representative memory representation.</Description>
     <PackageProjectUrl>https://github.com/christophediericx/IntelHexFormatReader</PackageProjectUrl>
     <PackageIconUrl>https://avatars3.githubusercontent.com/u/19640854?s=140</PackageIconUrl>
-    <Version>2.2.3</Version>
+    <Version>2.3.0</Version>
     <PackageTags>intel hex memory</PackageTags>
   </PropertyGroup>
 </Project>
